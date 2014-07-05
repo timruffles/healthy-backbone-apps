@@ -1,0 +1,66 @@
+
+## Ignorance is bliss 2.1
+
+A view should only know about its own `el`. Keeping to this rule ensures your views are modular - if any view could access any part of the DOM, your app is hard to reason about or test. It allows for easy reuse of views, as they are not coupled to their surrounding markup. An easy way to check your code follows this rule is to stick to `this.$el` and `this.$()` inside your views. That way you can be sure you're querying the DOM that view owns (and steer clear of `this.$el.parent()` and other traversal methods that go up the DOM).
+
+```javascript
+  handleSelect: function(event) {
+    // using the `this.$x` properties ensure we only touch the
+    // DOM this view controls
+    this.$(".series[" + event.target.data.series + "]")
+      .toggleClass(".selected");
+  },
+```
+
+An exception to this rule is for views that control some aspect of global display: like a modal manager that displays a single modal window at a time. Here the rule is to always pass in any elements such a view requires in its constructor. Again this keeps the view decoupled from the state of the DOM, so it can be used and tested independent of the global state.
+
+## Constructors are not for unique snowflakes
+
+A constructor suggests you'll be making many instances. Classes are for creating instances. If your final app ends up only creating one instance, fine, but it's confusing to define a class for a single object.
+
+To that end, two attributes to avoid defining as instance properties are `el` and `id`. Defining an `el` is worse by far - you [conflate define and launch time] and [couple to global state]: you can't test without having the `el` on the DOM. Defining `id` is just a little confusing, as classes are a group and `id`s in the DOM are by definition unique.
+
+
+## Rendering 2.2
+
+Define as many render methods as you want. The main `render` is conventionally a method you can call to ensure a view is up to date with its model. Often this is all you need - if you've 
+
+
+## Don't break the web 2.3
+
+Links are something people rely on, and unfortunately Backbone makes it pretty easy to break them. Ensure you keep your  users happy (especially power-users who'll want to be able to right click and open new tab) by giving them the best of both worlds: SPA speed, and working links.
+
+All we need to achieve this is the humble `href` attribute, some way of marking links as internal, and a helper to delegate clicks through to `Backbone.history.navigate`.
+
+```javascript
+function routeInternalLinks(body,internalLinkSelector,router) {
+  $(body).on("click",internalLinkSelector,function(event) {
+    event.preventDefault();
+    router.navigate(event.target.href,{trigger: true});
+  });
+}
+```
+
+## Related views 2.4
+
+Views can fire events too! Use this to inform immediate parent views of events without coupling the child.
+
+## Global dodge without the boiler-plate 2.5
+
+There are a few variables in most applications that many views will require - especially the `User` or `Session`, and possibly the application-wide `pubSub` object. It can be a pain to pass them down the view hierarchy, and the temptation is to use a global. What a dilemma! We can cheat our way out of this one however, by allowing views to take a specific `User` or `pubSub` in their constructor, or fall back to the global if none is provided.
+
+```
+var AppView = Backbone.View.extend({
+  constructor: function(options) {
+    this.user = (options && options.user) || window.user;
+    AppView.__super__.call(this,options);
+  }
+});
+```
+
+Logically we've got the best of both world here without losing flexibility. If sub-systems required their own `pubSub` or `user` we can provide it. We can easily inject dependencies for tests. And if we don't need sub-systems we would have ended up with the same effect - one `user` everywhere - without a heap of boring boiler-plate.
+
+## Bang for buck while testing views
+
+
+
