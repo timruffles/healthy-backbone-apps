@@ -41,6 +41,20 @@ function routeInternalLinks(body,internalLinkSelector,router) {
 }
 ```
 
+Then our internal links need something to select them - a class works fine:
+
+```html
+<a href="/products/snail-jumper" class="internal">Snail jumper</a>
+```
+
+Now when we boot up the app we pass the router through to our helper. Power-users rejoice!
+
+```javascript
+routeInternalLinks(document.body,".internal",appRouter);
+```
+
+
+
 ## Related views 2.4
 
 Views can fire events too! Use this to inform immediate parent views of events without coupling the child.
