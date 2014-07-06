@@ -1,0 +1,33 @@
+
+## Access nested models via `.get()`
+
+Keep nested models inside attributes. This gives consistency in the cases where the nested model might change completely (e.g your user switches team), and where it'll just be fields inside the nested model changing. Trying to remember which models live on `model.{property}` and which are `model.get("{property}")` is a pain.
+
+## Fire intention revealing events
+
+Often changes in attributes have an app-specific meaning. For instance, often a `User` object is request on app load, and if the response is successful the users id will be set. You could listen in your views for `change:id`, but to people reading the code it's not obvious this means "login".
+
+Wrap up the implementation details of these events with a higher-level event that describes it. That way the code is intention-revealing, and the listeners don't need to change if the implementation changes (e.g you `User` now always has an `id` but has a `isAuthorised` field).
+
+To implement this simply have the model listen to itself and refire the higher-level event. Note this is following the "model, thing changed, options" arguments pattern of Backbone.Model for consistency:
+
+```javascript
+var User = Backbone.Model.extend({
+  initialize: function() {
+    this.on("change:id",function(_model,to) {
+      this.fire("authorised",this,to != null);
+    },this);
+  }
+});
+```
+
+Views now listen to the `authorised` event:
+
+```javascript
+var UserWidget = Backbone.View.extend({
+  initialize: function(options) {
+    this.listenTo(options.user,"authorised",this.renderAuthorised,this);
+  }
+});
+```
+

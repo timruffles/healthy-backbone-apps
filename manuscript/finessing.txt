@@ -1,0 +1,36 @@
+
+## Have a fast boot
+
+Navigation within a single-page-app is faster than with a server-side application, but the initial load is slower (which is why it isn't ideal for content-focussed sites). It's therefore worth making the effort to make this as fast as possible - first impressions count!
+
+Here's the order of events we'll go through to get something in front of our user:
+
+1. initial `index.html` request
+1. CSS
+1. any blocking scripts
+1. HTML renders
+1. Backbone loaded, initial renders
+1. AJAX requests for data
+1. views render data
+
+Getting to step 4 as fast as possible is a good way to show the user something's going on - we can load in a skeleton of the UI that Backbone will then take over, with a loading message, spinner or placeholder data.
+
+As a bare-minimum you should be gzip-compressing all HTML, CSS and especially JS sent by your server. This is normally a default, but do check via your browser's developer tools if it's enabled. Next, build your JS and CSS into a small number of files and minify them. Minfication crushes down long variable names and cuts out whitespace to save precious milliseconds of loading time.
+
+Ensure you're using your libraries' selective builds. For example jQuery can be built without its animation functionality if you're doing all animations via CSS.
+
+If your app is big, or it uses large libraries like Highcharts, split it into multiple layers. For instance a core layer containing Backbone, jQuery, underscore and your top-level views and models, then a layer with your charting libraries and views. Load the charting layer as a user requires it - a concept called lazy-loading. [require.js](http://requirejs.org/) makes this extremely easy.
+
+Allow your browser to display your HTML before your JS is loaded by switching blocking `<script>` loads to non-blocking. If you're targetting `IE10+` you can simply use the `async` property: `<script async>`. That'll tell the browser not to wait for the script to be loaded before rendering. If you're supporting older browsers, use the same trick you'll have seen in Google analytics tags forever. Create a script tag via an inline-Javascript tag immediately before the `</body>` tag, set the `src` to your app's JS, and add it to the page. Dynamically added scripts are non-blocking by default, so you're sorted!
+
+Minimising images required for the UI to look "ready" is a good idea, but any essential images (logos etc) can be included via a `data` URL to include them in the first HTTP request.
+
+I> ## Other resources
+I>
+I> Optimisation is a huge topic on its own, here are some links to get you started:
+I> - [require.js](http://requirejs.org/)
+I> - Minifiers like [uglify.js](https://github.com/mishoo/UglifyJS) and the [Google Closure compiler](https://developers.google.com/closure/compiler/) crunch down your JS to save bandwidth
+I> - [Google PageSpeed tool - tells you what's slowing down your page](https://developers.google.com/speed/pagespeed/)
+I> - [HTML5 & script-loading](http://www.html5rocks.com/en/tutorials/speed/script-loading/)
+I> - ['High Performance Browser Networking'](http://chimera.labs.oreilly.com/books/1230000000545) - Ilya Grigorik from Google's 'Make The Web Fast team' has written a book on the nitty-gritty of browser-networking
+
