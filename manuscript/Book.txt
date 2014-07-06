@@ -1,2 +1,4 @@
 principles.txt
+models.txt
 views.txt
+finessing.txt
