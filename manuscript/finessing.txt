@@ -29,6 +29,7 @@ Minimising images required for the UI to look "ready" is a good idea, but any es
 I> ## Other resources
 I>
 I> Optimisation is a huge topic on its own, here are some links to get you started:
+I>
 I> - [require.js](http://requirejs.org/)
 I> - Minifiers like [uglify.js](https://github.com/mishoo/UglifyJS) and the [Google Closure compiler](https://developers.google.com/closure/compiler/) crunch down your JS to save bandwidth
 I> - [Google PageSpeed tool - tells you what's slowing down your page](https://developers.google.com/speed/pagespeed/)
