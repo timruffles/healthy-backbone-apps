@@ -1,4 +1,8 @@
+intro.txt
 principles.txt
+structure.txt
+mvc.txt
 models.txt
 views.txt
 finessing.txt
+tools.txt

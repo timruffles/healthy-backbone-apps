@@ -1,0 +1,17 @@
+# Tools
+
+## Module system
+
+Use one! It's boring to ensure you've included all the script-tags required, in the right order, and maintaing it twice in build and test.
+
+Browserify is a good option as you can grab any module from `npm` that works in the browser. It does mandate a build-step in development - but that's often in place already for SASS or other pre-processing.
+
+require.js solves that problem, but has a slightly uglier syntax. It also can be a bit of a pain to share the config between testing and production environments - which often itself requires a build-step to avoid bug-prone manual labour. Lazy-loading is a core feature of require.js however, and is extremely easy to use thanks to its asynchronous syntax.
+
+Both make it really easy to write apps composed of many small modules after a little bit of setup.
+
+## JSHint
+
+JSHint scans your Javascript code for common errors. The most useful by far is the undeclared variable alert - it's caught innumerable typos of mine. If you have a variable `commissions` and you write `commmissions = {}`, JSHint will cough up a helpful alert.
+
+Pop it in a pre-commit hook for git or subversion, commit a `.jshint` file configured to fit the style of JS your team writes, and avoid some annoying traps JS has set for you.

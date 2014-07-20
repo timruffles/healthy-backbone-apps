@@ -1,0 +1,14 @@
+# Model view controller
+
+MVC, like most patterns, can look quiet different in different implementations. It's a good idea to understand why the pattern emerged in the first place. It'll help you make good decisions on how to use Backbone, and even more importantly, what to do when Backbone hasn't made a decision for you about how to implement a feature you need.
+
+First - it's helpful to consider why we're building a user-interface at all. Our app will eventually do something for a user, it's a solution to a problem they have. A jargon term for this is 'domain', from the 'problem domain'. We call this the 'domain' of the app. We could talk to the user about this domain - whether photo-editing, real-estate, social-networking or banking - and they'd know what we meant and they'd share our vocabulary.
+
+If we started to discuss how we were solving this problem for them however - if we mentioned we were building a GUI with JS/HTML and CSS, presenting data from a RESTful interface powered by Go on a cloud-based infrastructure - their eyes would quickly glaze over. These details are accidental to the problem at hand - technically there are many solutions to these problems.
+
+In our code then we make a division between the domain - which has a logic of its own understood by users - and the stuff we to solve to the user's problem. The domain lives in the model - our 'model' of the real problem domain. This could encode the rules of a game the user wishes to play, or of a social network, or a bank. We could use this model without a user-inteface via the Javascript console - creating new objects and having them interact. It's a fully working model of the real problem, but unless the user is happy to bang away in a REPL, we're going to need to give them a real interface.
+
+That's where the view layer comes in - it allows our user to interfact with our model of their problem. They can see the current state of the domain, and issue commands to change it. When their commands affect the state the view should change to reflect that. The essential loop of MVC is the view displaying the model, commands modifying the model, and the view updating to reflect that.
+
+ In the browser we have a fantastic way to draw things to the screen: HTML and CSS. Tradiaonally this was the job of the view.
+

@@ -15,17 +15,18 @@ A view should only know about its own `el`. Keeping to this rule ensures your vi
 
 An exception to this rule is for views that control some aspect of global display: like a modal manager that displays a single modal window at a time. Here the rule is to always pass in any elements such a view requires in its constructor. Again this keeps the view decoupled from the state of the DOM, so it can be used and tested independent of the global state.
 
+I> # Rule of thumb
+I> Stick to `this.$el` and `this.$()` to ensure you're only know about the DOM of the view in question (and don't use `.parent()` and friends: access your `el` and below only!).
+
 ## Constructors are not for unique snowflakes
 
 A constructor suggests you'll be making many instances. Classes are for creating instances. If your final app ends up only creating one instance, fine, but it's confusing to define a class for a single object.
 
 To that end, two attributes to avoid defining as instance properties are `el` and `id`. Defining an `el` is worse by far - you [conflate define and launch time] and [couple to global state]: you can't test without having the `el` on the DOM. Defining `id` is just a little confusing, as classes are a group and `id`s in the DOM are by definition unique.
 
-
 ## Rendering 2.2
 
-Define as many render methods as you want. The main `render` is conventionally a method you can call to ensure a view is up to date with its model. Often this is all you need - if you've 
-
+Define as many render methods as you want. The main `render` is conventionally a method you can call to ensure a view is up to date with its model. Often this is all you need - if you've split you view up into reasonably-sized chunks the browser will easily handle rewriting the HTML. If you find spots where your rendering is getting in the way of a smooth app define additional render methods that update just what's required in response to an event.
 
 ## Don't break the web 2.3
 
@@ -48,17 +49,25 @@ Then our internal links need something to select them - a class works fine:
 <a href="/products/snail-jumper" class="internal">Snail jumper</a>
 ```
 
-Now when we boot up the app we pass the router through to our helper. Power-users rejoice!
+Now when we boot up the app we pass the router through to our helper.
 
 ```javascript
 routeInternalLinks(document.body,".internal",appRouter);
 ```
 
-
+Proper links - power-users rejoice!
 
 ## Related views 2.4
 
 Views can fire events too! Use this to inform immediate parent views of events without coupling the child.
+
+## Views that have multiple elements
+
+A few view feels like they absolutely have to 
+
+## Modals
+
+Modals are no exception to the rule that a view never knows where it's attached. Create a modal manager and pass it a top-level `el` so it remains testable. Inform it of modals that need to appear via events.
 
 ## Global dodge without the boiler-plate 2.5
 
@@ -68,7 +77,7 @@ There are a few variables in most applications that many views will require - es
 var AppView = Backbone.View.extend({
   constructor: function(options) {
     this.user = (options && options.user) || window.user;
-    AppView.__super__.call(this,options);
+    Backbone.View.call(this,options);
   }
 });
 ```
@@ -79,3 +88,10 @@ Logically we've got the best of both world here without losing flexibility. If s
 
 
 
+## Spinners!
+
+Do take a look at Backbone's [catalog of built in events](http://backbonejs.org/#Events-catalog). In there are two methods that are great for informing your user you're making a request, and what happened when it's finished: `request`, `sync` and `error`. Rather than having to pop in callbacks all over the place you can `listenTo` these in your `initialize` method. That way you can be sure you'll not forget to clean up the handlers and inadvertantly create a memory leak.
+
+## No `$.ajax`
+
+Don't use AJAX in your views. It's not their job! Wrap it up in a model for consistency.

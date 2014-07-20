@@ -1,3 +1,26 @@
 # Principles
 
+- coherent objects (separation of concerns)
+- hierarchy
+
 ## Principled apps 1.1
+
+## Small objects with simple jobs
+
+In any style of coding, modules with a single task are easier to understand. Object-oriented designs work best with objects that are focussed on a single task. MVC at its core is an application of separation of concerns: the realisation that how we present the state of our domain visually is not a part of the domain itself. Equally, later I'll point out that how we persist the state of the domain is also not a part of the model.
+
+A lot of the specific points later in the book are applications of this rule. Don't have your one router control the whole app: have a system of routers. Don't let the router know about the DOM, it has enough on its plate parsing and serialising URLs. Don't confuse your model layer with persistence, and so on.
+
+## Hierarchy
+
+Ensuring your app's structure is hierarchical will fall naturally out of the first principle. A view that deals with a collection of things, shouldn't also deal with rendering individual items: it has quite enough to deal with already handling items being added, removed or reordered.
+
+The DOM is a huge, ever changing global variable with no access control. It's a very good idea to have a strategy for dealing with it before it turns your application into a source of regret and woe for your team. Having a hierarchicnal approach in your views will ensure you know exactly which bit of code is in control of a given chunk of DOM.
+
+## Instances over singletons
+
+Singletons are a pattern that promotes tight coupling. Much better to pass collaborator objects into constructors as much as possible, as it keeps the code explicit, malleable and very easy to test.
+
+## You're a framework author
+
+Backbone is a library not a framework. You're having to make big decisions that other frameworks make for you. So if you feel like you're having to create a lot of [boiler-plate](x-ref:boiler-plate) while using Backbone you've probably got some structure to add. Don't be afraid of extending Backbone: it's the bare-minimum of MVC written for you, ready and expecting you to build it up towards solving your app's problems.

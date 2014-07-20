@@ -1,0 +1,7 @@
+# Recipes for tasty Backbone Apps
+
+If you know how to use Backbone's APIs and are looking to digs deeper into the right way do things book is for you. It's explicitly not about telling you the arguments to `Backbone.history.start()`, instead it's a collection of lessons and principles I've learned from building a range of Backbone apps since 2010.
+
+## How to read the book
+
+I'd suggest you skim through the titles of the chapters (which I've tried to keep free of content-concealing puns) to see what surprises/confused/annoys you. Then dig in!

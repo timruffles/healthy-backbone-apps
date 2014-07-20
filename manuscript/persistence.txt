@@ -1,0 +1,100 @@
+# Persistence
+
+The missing word in MVC for me is persistence. Very few apps can do without persistence, and considering it part of the model's responsibilities makes for very messy code indeed.
+
+## Persistence doesn't belong in the model
+
+Backbone by default is optimised for RESTful APIs shared by all the models in an application. If only it were always that easy. Dealing with legacy APIs, where a couple of models will be persisted via an XML API, and the rest with a new JSON API is common. Increasingly real-time persistence via web-sockets or streaming HTTP is also a requirement.
+
+In a multi-API environment having persistence implementation in the model is recipe for complexity overload. A single `url`, `parse` or `toJSON` isn't going to cut it. Better to define a `sync` implementation for each of your APIs and shift the majority of the work there.
+
+## Tag models
+
+If we keep persistence out of the model layer, we'll need some way of identifying the type of a model or collection when its syncing.
+
+It's hard to identify the type of a Javascript ojbect. There's no reference to the constructor's name by default - like a `obj.class.to_s` in Ruby or `obj.getClass()` in Java. One option is to use switch statements and `instanceof`, another is to tag our prototypes. That way we can use the class name to generate URLs, decide which APIs to dispatch to etc, whichever method of syncing we're using.
+
+For instance, rather than manually setting our URLs we can easily generate them:
+
+    var Message = Backbone.Model.extend({
+      type: "Message",
+      sync: conventionOverConfigurationRestSync
+    });
+
+    Message.Collection = Backbone.Model.extend({
+      sync: conventionOverConfigurationRestSync
+    });
+
+    // used within conventionOverConfigurationRestSync
+    function generateUrl(method, model) {
+      var resource;
+
+      if(model instanceof Backbone.Collection) {
+        resource = model.model.type.toLowerCase(); 
+      } else if(model instanceOf Backbone.Model ) {
+        resource = model.type.toLowerCase() + (method === "create" ? "" : "/" + model.id);
+      }
+
+      return resource;
+    }
+
+You'll probably find the approach of tagging the models goes a long way for eliminating boiler-plate whatever the method of persistence.
+
+## Keep meta-data separate
+
+Persistence often requires meta-data. Managing this meta-data shouldn't infect your model with additional complexity.
+
+For instance: collections need to store paging data. The standard Backbone collection has nowhere to store this, so another approach will be required. Using a `Backbone.Model` as a collaborator object to capture the meta-data is a clean pattern. Extending set and reset to handle `{ meta: {}, models: [] }` rather than an array of models allows our `PagedCollection` to work with any `Backbone.sync` method. `sync` methods which have meta-data - for instance from the HTTP headers - can now call their `success` callback with the `{ meta: {}, models: [] }` object.
+
+    var PagedCollection = Backbone.Collection.extend({
+      collection: function() {
+        this._meta = new Backbone.Model;
+        Backbone.Collection.apply(this, arguments);
+      },
+      set: function(models, options) {
+        if(models._meta) {
+          this.setMeta(models._meta, options);
+          return this.set(models.models, options);
+        } else {
+          return this.set(models, options);
+        }
+      },
+      reset: function(models, options) {
+        if(models._meta) {
+          this.setMeta(models._meta, options);
+          return this.reset(models.models, options);
+        } else {
+          return this.reset(models, options);
+        }
+      },
+      setMeta: function() {
+        return this._meta.set.apply(this._meta, arguments);
+      },
+      getMeta: function(key) {
+        return this._meta.get(key);
+      },
+      isLastPage: function() {
+        return this.getMeta("page") === this.getMeta("pageCount") - 1;
+      },
+      // more pagination methods ...
+    });
+
+
+## Be intolerent of foreign languages
+
+Talking to APIs or databases to persist your models often means having two vocabularies to deal with: that of your model, and that of the API or data-store. Don't allow this language to leak into your app: convert it all in your persistence layer. 
+
+For instance, Rails uses `snake_case`, whereas Javascript is `camelCase`. Having to remember where you should be saying `full_name` instead of `fullName` is a nasty source of complexity and typos. Convert it all from snake to camel on the way in, and camel to snake on the way out.
+
+## Fix bad data
+
+Data from APIs can be messy. Strings instead of numbers, weird formats, un-hydrated objects. Don't tolerate this getting into your app - solve it once and for-all before it hits your model. Turn timestamps into real `Date` objects. Parse strings to numbers.
+
+## If it's saving state, it belongs in persistence
+
+Don't make exceptions, where suddenly your view is talking to `localStorage`. This confuses the responsibilities in your app. If you're talking to something to retrieve or save state - cookies, `localStorage`, web-sockets, `IndexedDB`, Chrome background tabs - wrap it up in a `sync` method!
+
+
+## Dynamic persistence
+
+`Backbone.sync` is a straight function, so having multiple syncs for an object, even deciding which one to dispatch to per request, is easy. Via the magic of `apply`:

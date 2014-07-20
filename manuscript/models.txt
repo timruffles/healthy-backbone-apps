@@ -32,3 +32,35 @@ var UserWidget = Backbone.View.extend({
 });
 ```
 
+## Control change
+
+If your model isn't simply going to take in form data and post it off to the server it doesn't really make sense to allow it to accept invalid attributes. The benefit of encapsulating our data behind the `set()` gateway is we can control access. One simple way to prevent a model ever becoming invalid is to override set and make it validate by default:
+
+```javascript
+var ValidatedModel = Backbone.Model.extend({
+  set: function(key,value,options) {
+    if (typeof key === 'object') {
+      options = value;
+    }
+    if(!("validate" in options)) {
+      options.validate = true;
+    }
+    return ValidatedModel.__super__.set.apply(this,arguments);
+  }
+});
+```
+
+## Form models
+
+When we're implementing forms it's good user-experience not to make a user re-enter data. This means if they're part-way through a form their input shouldn't go away - ideally even across navigation or refreshes.
+
+Storing this invalid state can muddy the state of a model - especially if it's being updated and we don't want to lose the existing, valid, data. Again this is where a collaborating model can dramatically simplify the code. Create a form model to capture and store the input. When it's valid we can commit the state to the real model, and save it to the server. That way our real model ndoesn't require any code to handle the weird state it'll end up in during editing via the form.
+
+// TODO ask Ben re his problem with forms and backbone
+
+## View models
+
+Widgets often have state - selections, partial edits, undo state. Just like domain state this often needs to be persisted - probably to a client-side store like `localStorage` or `IndexedDB`. Capturing this state in a `View` isn't a great idea: they don't have a means to observe changes, nor persist them. Far better to create `ViewModel`s to store, provide notifications for, and persist any view state.
+
+A view-model can just be another `Backbone.Model`.
+
