@@ -1,0 +1,11 @@
+# When to choose Backbone
+
+Backbone is a library, not a framework. The benefits of its less ambitious scope are flexibility - because many decisions are not made for you - size and predictability.
+
+The flexibility of Backbone allows it to be used in many places where larger frameworks would be mostly wasted. For instance games based on canvas or WebGL would still be able to use Backbone's `Model`s and `View`s without alteration. If you were to drop in Ember or Angular you'd find a huge part of the framework would either fight you or be wasted. Backbone's agnosticism as to how the view works gives you complete control over rendering.
+
+The low size of Backbone makes it ideal to give structure to Javascript that progressively enhances mostly static content. A single small image on the page will likely outweigh the TODO kb that Backbone and underscore add when minified and gzipped.
+
+Equally if your application is going to be largely form-based, inputting and editing data, then two-way data-binding and a heavy emphasis on abstracting the DOM makes sense. A majority of applications probably fit this category and the tasks they do are well understood. Convention over configuration is likely the way to go in such cases, as wheels will not be reinvented, new employees will on-board faster, and the maintenance burden will be handled by the community.
+
+Finally Backbone is extremely predictable and faster to *master* than a framework. At ~1500 lines of code with comments it's not unrealistic to expect your whole team to have read and understood the source-code of the library. While its small size may require extra work, complete understanding of the library means you'll never run into issues you can't debug. Backbone's time and space properties are very predictable and its internals are simple. Some people prefer to trade a bit of extra boiler-plate for less frustration when you hit a bug, or a aspect of a framework thats buggy or blocks something you're attempting to do.
